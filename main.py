@@ -62,6 +62,10 @@ if __name__ == '__main__':
         evaluation_strategy="epoch",
         learning_rate=2e-5,
         weight_decay=0.01,
+        per_gpu_train_batch_size=1,
+        per_device_eval_batch_size=1,
+        per_device_train_batch_size=1,
+        per_gpu_eval_batch_size=1,
     )
 
     trainer = Trainer(
