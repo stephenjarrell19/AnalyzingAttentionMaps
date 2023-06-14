@@ -9,7 +9,7 @@ from data_processing.poems import *
 
 
 def preprocess_function(examples):
-    return tokenizer([" ".join(x) for x in examples["text"]])
+    return tokenizer([" ".join(x) for x in examples["text"]], truncation=True, max_length=2048)
 
 
 if __name__ == '__main__':
@@ -23,15 +23,16 @@ if __name__ == '__main__':
         dataset = load_arxiv_dataset(cfg)
 
     dataset = dataset.train_test_split(test_size=0.2)
-    tokenizer = AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-125M', max_length=2048)
+    tokenizer = AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-125M')
     tokenized_dataset = dataset.map(
         preprocess_function,
         batched=True,
         num_proc=4,
     )
-    
+
     # Get Model
     model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M")
+
     # Train Model
 
 
