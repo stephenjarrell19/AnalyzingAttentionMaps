@@ -60,12 +60,13 @@ if __name__ == '__main__':
     training_args = TrainingArguments(
         output_dir="arxiv-model",
         evaluation_strategy="epoch",
-        learning_rate=2e-5,
-        weight_decay=0.01,
-        per_gpu_train_batch_size=1,
-        per_device_eval_batch_size=1,
+        optim='adafactor',
+        learning_rate=1e-3,
+        gradient_checkpointing=True,
         per_device_train_batch_size=1,
-        per_gpu_eval_batch_size=1,
+        gradient_accumulation_steps=4, 
+        fp16=True,
+        num_train_epochs=4,
     )
 
     trainer = Trainer(
@@ -77,5 +78,6 @@ if __name__ == '__main__':
     )
 
     trainer.train()
+    trainer.save_model()
 
     # Save Model
