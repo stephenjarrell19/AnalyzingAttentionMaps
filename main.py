@@ -1,9 +1,15 @@
 import yaml
 import sys
 from transformers import AutoTokenizer
+from transformers import AutoModelForCausalLM, TrainingArguments, Trainer
+
 from data_processing.arxiv import *
 from data_processing.common_crawl import *
 from data_processing.poems import *
+
+
+def preprocess_function(examples):
+    return tokenizer([" ".join(x) for x in examples["text"]])
 
 
 if __name__ == '__main__':
@@ -14,13 +20,19 @@ if __name__ == '__main__':
 
     # Get Dataset
     if cfg["Dataset"] == 'arxiv':
-        dataset = load_arxiv_dataset(cfg["data_path"])
+        dataset = load_arxiv_dataset(cfg)
 
-    # Get Model
     dataset = dataset.train_test_split(test_size=0.2)
-    tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
-
-    print(dataset['train'][0])
+    tokenizer = AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-125M', max_length=2048)
+    tokenized_dataset = dataset.map(
+        preprocess_function,
+        batched=True,
+        num_proc=4,
+    )
+    
+    # Get Model
+    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M")
     # Train Model
+
 
     # Save Model

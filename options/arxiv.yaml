@@ -1,2 +1,3 @@
 Dataset: arxiv
 data_path: 'data/arxiv_dataset.json'
+size: 10000

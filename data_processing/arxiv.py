@@ -1,14 +1,14 @@
 import json
 from datasets import Dataset
 
-def load_arxiv(data_path: str="data/"):
+def load_arxiv(data_path: str="data/", size: int=10000):
 
     try:
         arxiv = []
         with open(data_path, 'r') as file:
             # 2272690 Lines
             for i, line in enumerate(file):
-                if i > 1000000:
+                if i > size:
                     break
                 arxiv.append(line)
     except:
@@ -35,11 +35,15 @@ def preprocess_arxiv(data):
     
     arxiv = {'text': []}
     for i, item in enumerate(data):
-        arxiv['text'].append(item['title'] + ': ' +item['abstract'])
+        value = item['title'] + ': ' +item['abstract']
+        # Sequence limit of GPT-Neo125M
+        if len(value) <= 2048:
+            arxiv['text'].append(value)
     return arxiv
 
-def load_arxiv_dataset(data_path="../data/arxiv_dataset.json"):
-
+def load_arxiv_dataset(cfg):
+    data_path = cfg["data_path"]
+    dataset_size = cfg["size"]
     data = load_arxiv(data_path)
     data = preprocess_arxiv(data)
     dataset = Dataset.from_dict(data)
