@@ -1,1 +1,2 @@
 Dataset: arxiv
+data_path: 'data/arxiv_dataset.json'

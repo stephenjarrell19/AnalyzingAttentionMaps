@@ -38,9 +38,9 @@ def preprocess_arxiv(data):
         arxiv['text'].append(item['title'] + ': ' +item['abstract'])
     return arxiv
 
-def load_arxiv(data_path="../data/arxiv_dataset.json"):
+def load_arxiv_dataset(data_path="../data/arxiv_dataset.json"):
 
-    data = load_arxiv(data_path="../data/arxiv_dataset.json")
+    data = load_arxiv(data_path)
     data = preprocess_arxiv(data)
     dataset = Dataset.from_dict(data)
 
