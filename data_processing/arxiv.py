@@ -1,7 +1,5 @@
 import json
-import os
-import numpy as np
-import torch
+from datasets import Dataset
 
 def load_arxiv(data_path: str="data/"):
 
@@ -14,7 +12,7 @@ def load_arxiv(data_path: str="data/"):
                     break
                 arxiv.append(line)
     except:
-        raise ValueError('Data file not found')
+        raise ValueError(f'Data file not found at path {data_path}')
 
     return arxiv
 
@@ -34,14 +32,16 @@ def preprocess_arxiv(data):
             line[k] = v
         
         data[i] = line
-    return data
+    
+    arxiv = {'text': []}
+    for i, item in enumerate(data):
+        arxiv['text'].append(item['title'] + ': ' +item['abstract'])
+    return arxiv
 
-def get_arxiv(data_path="../data/arxiv_dataset.json"):
+def load_arxiv(data_path="../data/arxiv_dataset.json"):
 
     data = load_arxiv(data_path="../data/arxiv_dataset.json")
     data = preprocess_arxiv(data)
-    return data
+    dataset = Dataset.from_dict(data)
 
-
-data = get_arxiv()
-print(data[:4])
+    return dataset
