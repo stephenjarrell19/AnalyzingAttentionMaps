@@ -49,10 +49,6 @@ if __name__ == '__main__':
     outputs = model.generate(inputs, max_new_tokens=100, do_sample=True, top_k=50, top_p=0.95)
     output_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     tokens = tokenizer.convert_ids_to_tokens(inputs[0])
-    print(output_text)
-    print(outputs)
     attention = model(inputs)[-1]
-    print(attention)
+    torch.save(torch.stack(attention), 'arxiv.pt')
     model_view(attention, tokens)
-
-    # Save Model
