@@ -1,6 +1,7 @@
 import yaml
 import sys
 import re
+import pdb
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM, TrainingArguments, Trainer
 from transformers import DataCollatorForLanguageModeling
@@ -44,6 +45,7 @@ if __name__ == '__main__':
         dataset = load_arxiv_dataset(cfg)
 
     dataset = dataset.train_test_split(test_size=0.2)
+    pdb.set_trace()
     tokenizer = AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-125M')
     tokenized_dataset = dataset.map(
         preprocess_function,

@@ -36,7 +36,7 @@ if __name__ == '__main__':
     with open(f'options/{sys.argv[1]}.yaml','r') as f:
         cfg = yaml.safe_load(f)
 
-    prompt = "One day"
+    prompt = sys.argv[2]
 
     # Get Dataset
     if cfg["Dataset"] == 'arxiv':
@@ -50,5 +50,6 @@ if __name__ == '__main__':
     output_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     tokens = tokenizer.convert_ids_to_tokens(inputs[0])
     attention = model(inputs)[-1]
-    torch.save(torch.stack(attention), 'arxiv.pt')
+    print(output_text)
+    torch.save(torch.stack(attention), f'{sys.argv[1]}.pt')
     model_view(attention, tokens)
