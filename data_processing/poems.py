@@ -19,3 +19,19 @@ def group_texts(examples):
     }
     result["labels"] = result["input_ids"].copy()
     return result
+
+from transformers import TrainingArguments
+!pip install accelerate -U
+training_args = TrainingArguments(
+    output_dir="my_poem_model_final",
+    evaluation_strategy = "epoch",
+    learning_rate=1e-4,
+    weight_decay=0.01,
+    push_to_hub=True,
+    num_train_epochs=10,
+    per_device_train_batch_size=8,  # batch size per device during training
+    per_device_eval_batch_size=16,
+    
+
+)
+
