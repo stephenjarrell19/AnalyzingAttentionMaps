@@ -1,15 +1,12 @@
 import yaml
 import sys
-import re
+from bertviz import model_view
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM, TrainingArguments, Trainer
 from transformers import DataCollatorForLanguageModeling
 from data_processing.arxiv import *
 from data_processing.common_crawl import *
 from data_processing.poems import *
-
-
-
 
 
 def group_texts(examples):
@@ -30,7 +27,7 @@ def group_texts(examples):
 
 
 def preprocess_function(examples):
-    return tokenizer([re.split(r'(\s)', x) for x in examples["text"]], truncation=True, max_length=2048)
+    return tokenizer([" ".join(x) for x in examples["text"]], truncation=True, max_length=2048)
 
 
 if __name__ == '__main__':
@@ -39,45 +36,23 @@ if __name__ == '__main__':
     with open(f'options/{sys.argv[1]}.yaml','r') as f:
         cfg = yaml.safe_load(f)
 
+    prompt = "One day"
+
     # Get Dataset
     if cfg["Dataset"] == 'arxiv':
         dataset = load_arxiv_dataset(cfg)
+        model = AutoModelForCausalLM.from_pretrained(cfg['save_path']+"/fine_tuned_model/", output_attentions=True)
 
     dataset = dataset.train_test_split(test_size=0.2)
-    tokenizer = AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-125M')
-    tokenized_dataset = dataset.map(
-        preprocess_function,
-        batched=True,
-        num_proc=4,
-    )
-
-    tokenizer.pad_token = tokenizer.eos_token
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
-    lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=4)
-    # Get Model
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M")
-
-    # Train Model
-    training_args = TrainingArguments(
-        output_dir="arxiv-model",
-        evaluation_strategy="epoch",
-        learning_rate=1e-3,
-        per_device_train_batch_size=1,
-        gradient_accumulation_steps=4, 
-        fp16=True,
-        num_train_epochs=4,
-    )
-
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["test"],
-        data_collator=data_collator,
-    )
-
-    trainer.train()
-    trainer.save_model(cfg["save_path"]+"gpt-neo")
-    tokenizer.save_pretrained(cfg["save_path"]+"tokenizer")
+    tokenizer = AutoTokenizer.from_pretrained(cfg['save_path']+"/tokenizer")
+    inputs = tokenizer.encode(prompt, return_tensors="pt")
+    outputs = model.generate(inputs, max_new_tokens=100, do_sample=True, top_k=50, top_p=0.95)
+    output_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    tokens = tokenizer.convert_ids_to_tokens(inputs[0])
+    print(output_text)
+    print(outputs)
+    attention = model(inputs)[-1]
+    print(attention)
+    model_view(attention, tokens)
 
     # Save Model
